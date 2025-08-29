@@ -15,7 +15,6 @@
 local.properties
 /gradlew
 /gradlew.bat
-/buildSrc/
 /.idea/.gitignore
 /.idea/appInsightsSettings.xml
 /.idea/compiler.xml
@@ -27,3 +26,5 @@ local.properties
 /.idea/runConfigurations.xml
 /.idea/vcs.xml
 /.idea/
+/buildSrc/.gradle/
+/buildSrc/build/

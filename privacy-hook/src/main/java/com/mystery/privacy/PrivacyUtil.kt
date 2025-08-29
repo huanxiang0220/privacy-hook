@@ -39,10 +39,10 @@ object PrivacyUtil {
 
     private const val TAG = "PrivacyUtil"
 
-    var isAgreePrivacy: Boolean = false
-    var isUseCache: Boolean = true
+    private var isAgreePrivacy: Boolean = false
+    private var isUseCache: Boolean = true
 
-    private var anyCache = HashMap<String, Any>()
+    private var anyCache = SharedPreferenceUtils.getPreferences(AppUtils.app)
 
     private fun checkAgreePrivacy(name: String): Boolean {
         if (!isAgreePrivacy) {
@@ -63,7 +63,7 @@ object PrivacyUtil {
     }
 
     private fun <T> getListCache(key: String): List<T>? {
-        if (!isUseCache){
+        if (!isUseCache) {
             return null
         }
         val cache = anyCache[key]
@@ -79,10 +79,10 @@ object PrivacyUtil {
     }
 
     private fun <T> getCache(key: String): T? {
-        if (!isUseCache){
+        if (!isUseCache) {
             return null
         }
-        val cache = anyCache[key]
+        val cache = anyCache.getSharedPreference(key, null)
         if (cache != null) {
             try {
                 Log.d(TAG, "getCache: key=$key,value=$cache")
@@ -95,21 +95,27 @@ object PrivacyUtil {
         return null
     }
 
-
     private fun <T> putCache(key: String, value: T): T {
         logI("putCache key=$key,value=$value")
         value?.let {
-            anyCache[key] = value
+            anyCache.put(key, value)
         }
         return value
     }
 
+    private fun <T> putListCache(key: String, value: List<T>?): List<T>? {
+        logI("putCache key=$key,value=$value")
+        value?.let {
+            anyCache.put(key, value.toString())
+        }
+        return value
+    }
 
     @JvmStatic
     @AsmMethodReplace(oriClass = ActivityManager::class, oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL)
-    fun getRunningAppProcesses(manager: ActivityManager): List<RunningAppProcessInfo?> {
+    fun getRunningAppProcesses(manager: ActivityManager): List<RunningAppProcessInfo>? {
         val key = "getRunningAppProcesses"
-        val cache = getListCache<RunningAppProcessInfo?>(key)
+        val cache = getListCache<RunningAppProcessInfo>(key)
         if (cache != null) {
             return cache
         }
@@ -117,7 +123,7 @@ object PrivacyUtil {
             return emptyList()
         }
         val value = manager.runningAppProcesses
-        return putCache(key, value)
+        return putListCache(key, value)
     }
 
     @JvmStatic
@@ -125,7 +131,7 @@ object PrivacyUtil {
     fun getRecentTasks(
         manager: ActivityManager,
         maxNum: Int,
-        flags: Int
+        flags: Int,
     ): List<ActivityManager.RecentTaskInfo>? {
         val key = "getRecentTasks"
         val cache = getListCache<ActivityManager.RecentTaskInfo>(key)
@@ -136,7 +142,7 @@ object PrivacyUtil {
             return emptyList()
         }
         val value = manager.getRecentTasks(maxNum, flags)
-        return putCache(key, value)
+        return putListCache(key, value)
 
     }
 
@@ -144,7 +150,7 @@ object PrivacyUtil {
     @AsmMethodReplace(oriClass = ActivityManager::class, oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL)
     fun getRunningTasks(
         manager: ActivityManager,
-        maxNum: Int
+        maxNum: Int,
     ): List<ActivityManager.RunningTaskInfo>? {
         val key = "getRunningTasks"
         val cache = getListCache<ActivityManager.RunningTaskInfo>(key)
@@ -155,7 +161,7 @@ object PrivacyUtil {
             return emptyList()
         }
         val value = manager.getRunningTasks(maxNum)
-        return putCache(key, value)
+        return putListCache(key, value)
 
     }
 
@@ -164,7 +170,10 @@ object PrivacyUtil {
      */
     @JvmStatic
     @SuppressLint("MissingPermission")
-    @AsmMethodReplace(oriClass = TelephonyManager::class, oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL)
+    @AsmMethodReplace(
+        oriClass = TelephonyManager::class,
+        oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL
+    )
     fun getAllCellInfo(manager: TelephonyManager): List<CellInfo>? {
         val key = "getAllCellInfo"
         val cache = getListCache<CellInfo>(key)
@@ -175,7 +184,7 @@ object PrivacyUtil {
             return emptyList()
         }
         val value = manager.getAllCellInfo()
-        return putCache(key, value)
+        return putListCache(key, value)
     }
 
     /**
@@ -183,7 +192,10 @@ object PrivacyUtil {
      */
     @SuppressLint("HardwareIds")
     @JvmStatic
-    @AsmMethodReplace(oriClass = TelephonyManager::class, oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL)
+    @AsmMethodReplace(
+        oriClass = TelephonyManager::class,
+        oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL
+    )
     fun getDeviceId(manager: TelephonyManager): String? {
         val key = "getDeviceId"
         val cache = getCache<String>(key)
@@ -203,7 +215,10 @@ object PrivacyUtil {
      */
     @SuppressLint("HardwareIds")
     @JvmStatic
-    @AsmMethodReplace(oriClass = TelephonyManager::class, oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL)
+    @AsmMethodReplace(
+        oriClass = TelephonyManager::class,
+        oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL
+    )
     fun getImei(manager: TelephonyManager): String? {
         val key = "getImei"
         val cache = getCache<String>(key)
@@ -222,7 +237,10 @@ object PrivacyUtil {
      */
     @SuppressLint("HardwareIds")
     @JvmStatic
-    @AsmMethodReplace(oriClass = TelephonyManager::class, oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL)
+    @AsmMethodReplace(
+        oriClass = TelephonyManager::class,
+        oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL
+    )
     fun getSimSerialNumber(manager: TelephonyManager): String? {
         val key = "getSimSerialNumber"
         val cache = getCache<String>(key)
@@ -332,7 +350,7 @@ object PrivacyUtil {
             return mutableListOf()
         }
         val value = manager.getSensorList(type)
-        return putCache(key, value)
+        return putListCache(key, value)
 
     }
 
@@ -352,7 +370,7 @@ object PrivacyUtil {
             return mutableListOf()
         }
         val value = manager.scanResults
-        return putCache(key, value)
+        return putListCache(key, value)
     }
 
     /**
@@ -369,7 +387,7 @@ object PrivacyUtil {
         if (!checkAgreePrivacy(key)) {
             return null
         }
-        val value = manager.getDhcpInfo()
+        val value = manager.dhcpInfo
         return putCache(key, value)
     }
 
@@ -389,8 +407,8 @@ object PrivacyUtil {
         if (!checkAgreePrivacy(key)) {
             return mutableListOf()
         }
-        val value = manager.getConfiguredNetworks()
-        return putCache(key, value)
+        val value = manager.configuredNetworks
+        return putListCache(key, value)
 
     }
 
@@ -402,7 +420,7 @@ object PrivacyUtil {
     @SuppressLint("MissingPermission")
     @AsmMethodReplace(oriClass = LocationManager::class, oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL)
     fun getLastKnownLocation(
-        manager: LocationManager, provider: String
+        manager: LocationManager, provider: String,
     ): Location? {
         if (!checkAgreePrivacy("getLastKnownLocation")) {
             return null
@@ -435,7 +453,7 @@ object PrivacyUtil {
     @AsmMethodReplace(oriClass = LocationManager::class, oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL)
     fun requestLocationUpdates(
         manager: LocationManager, provider: String, minTime: Long, minDistance: Float,
-        listener: LocationListener
+        listener: LocationListener,
     ) {
         if (!checkAgreePrivacy("requestLocationUpdates")) {
             return
@@ -448,8 +466,9 @@ object PrivacyUtil {
     private fun logI(log: String) {
         Log.i(TAG, log)
     }
+
     private fun logD(log: String) {
-        if (BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
             Log.d(TAG, log)
         }
     }
