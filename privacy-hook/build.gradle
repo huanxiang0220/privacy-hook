@@ -44,7 +44,7 @@ afterEvaluate {
 
                 groupId 'com.mystery.privacy-hook' // 组织ID
                 artifactId 'privacy-hook' // 项目ID
-                version '1.0.0' // 版本号
+                version '1.0.2' // 版本号
             }
         }
     }
