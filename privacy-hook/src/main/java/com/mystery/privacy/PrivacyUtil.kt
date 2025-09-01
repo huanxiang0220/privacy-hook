@@ -23,9 +23,6 @@ import com.mystery.privacy.annotation.AsmMethodReplace
 import com.mystery.privacy.annotation.BuildConfig
 
 /**
- * @author lanxiaobin
- * @date 2021/10/9
- *
  * 1、不要被混淆
  *
  * 2、Kotlin 的方法必须要使用JvmStatic注解，否则Java调用会报错
@@ -39,26 +36,16 @@ object PrivacyUtil {
 
     private const val TAG = "PrivacyUtil"
 
-    private var isAgreePrivacy: Boolean = false
-    private var isUseCache: Boolean = true
+    var isAgreePrivacy: Boolean = false
+    var isUseCache: Boolean = true
 
-    private var anyCache = SharedPreferenceUtils.getPreferences(AppUtils.app)
+    private var anyCache = HashMap<String, Any>()
 
     private fun checkAgreePrivacy(name: String): Boolean {
         if (!isAgreePrivacy) {
             logW("$name: isAgreePrivacy=false")
-            //没有同意隐私权限，打印堆栈，toast
-            if (BuildConfig.DEBUG) {
-//                Toast.makeText(
-//                    ApplicationContext.getContext(),
-//                    "隐私同意前禁止调用$name，现在返回默认值，log过滤PrivacyUtil",
-//                    Toast.LENGTH_LONG
-//                ).show()
-                Log.d(TAG, "$name: stack= " + Log.getStackTraceString(Throwable()))
-            }
             return false
         }
-
         return true
     }
 
@@ -82,7 +69,7 @@ object PrivacyUtil {
         if (!isUseCache) {
             return null
         }
-        val cache = anyCache.getSharedPreference(key, null)
+        val cache = anyCache[key]
         if (cache != null) {
             try {
                 Log.d(TAG, "getCache: key=$key,value=$cache")
@@ -95,27 +82,21 @@ object PrivacyUtil {
         return null
     }
 
+
     private fun <T> putCache(key: String, value: T): T {
         logI("putCache key=$key,value=$value")
         value?.let {
-            anyCache.put(key, value)
+            anyCache[key] = value
         }
         return value
     }
 
-    private fun <T> putListCache(key: String, value: List<T>?): List<T>? {
-        logI("putCache key=$key,value=$value")
-        value?.let {
-            anyCache.put(key, value.toString())
-        }
-        return value
-    }
 
     @JvmStatic
     @AsmMethodReplace(oriClass = ActivityManager::class, oriAccess = AsmMethodOpcodes.INVOKEVIRTUAL)
-    fun getRunningAppProcesses(manager: ActivityManager): List<RunningAppProcessInfo>? {
+    fun getRunningAppProcesses(manager: ActivityManager): List<RunningAppProcessInfo?> {
         val key = "getRunningAppProcesses"
-        val cache = getListCache<RunningAppProcessInfo>(key)
+        val cache = getListCache<RunningAppProcessInfo?>(key)
         if (cache != null) {
             return cache
         }
@@ -123,7 +104,7 @@ object PrivacyUtil {
             return emptyList()
         }
         val value = manager.runningAppProcesses
-        return putListCache(key, value)
+        return putCache(key, value)
     }
 
     @JvmStatic
@@ -142,7 +123,7 @@ object PrivacyUtil {
             return emptyList()
         }
         val value = manager.getRecentTasks(maxNum, flags)
-        return putListCache(key, value)
+        return putCache(key, value)
 
     }
 
@@ -161,8 +142,7 @@ object PrivacyUtil {
             return emptyList()
         }
         val value = manager.getRunningTasks(maxNum)
-        return putListCache(key, value)
-
+        return putCache(key, value)
     }
 
     /**
@@ -184,7 +164,7 @@ object PrivacyUtil {
             return emptyList()
         }
         val value = manager.getAllCellInfo()
-        return putListCache(key, value)
+        return putCache(key, value)
     }
 
     /**
@@ -206,7 +186,7 @@ object PrivacyUtil {
             return null
         }
         //READ_PHONE_STATE 已经整改去掉，返回null
-        //        return manager.deviceId
+//        return manager.deviceId
         return putCache(key, null)
     }
 
@@ -350,8 +330,7 @@ object PrivacyUtil {
             return mutableListOf()
         }
         val value = manager.getSensorList(type)
-        return putListCache(key, value)
-
+        return putCache(key, value)
     }
 
     /**
@@ -370,7 +349,7 @@ object PrivacyUtil {
             return mutableListOf()
         }
         val value = manager.scanResults
-        return putListCache(key, value)
+        return putCache(key, value)
     }
 
     /**
@@ -389,6 +368,7 @@ object PrivacyUtil {
         }
         val value = manager.dhcpInfo
         return putCache(key, value)
+
     }
 
 
@@ -408,7 +388,7 @@ object PrivacyUtil {
             return mutableListOf()
         }
         val value = manager.configuredNetworks
-        return putListCache(key, value)
+        return putCache(key, value)
 
     }
 
