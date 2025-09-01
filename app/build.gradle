@@ -45,5 +45,5 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.1'
 //    implementation project(path: ':privacy-hook')
-//    implementation 'com.github.huanxiang0220:privacy-hook:1.0.2'
+    implementation 'com.github.huanxiang0220:privacy-hook:1.0.5'
 }

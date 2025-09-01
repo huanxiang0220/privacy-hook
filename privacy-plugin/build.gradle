@@ -2,6 +2,7 @@ apply plugin: 'groovy'
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish' // 添加 Maven 发布插件
+apply plugin: 'java-gradle-plugin'
 
 sourceSets {
     main {
@@ -46,6 +47,16 @@ dependencies {
     kapt "com.google.auto.service:auto-service:1.1.1"
     api "com.didiglobal.booster:booster-api:$booster_version"
     api "com.didiglobal.booster:booster-transform-asm:$booster_version"
+}
+
+// 配置插件ID和实现类（关键：其他项目引用插件时使用的ID）
+gradlePlugin {
+    plugins {
+        create("myPlugin") {
+            id = "com.mystery.privacy-plugin"  // 插件唯一ID（需符合命名规范）
+            implementationClass = "com.mystery.plugin.HookPlugin"  // 插件实现类全限定名
+        }
+    }
 }
 
 //// 配置 Maven 发布信息（核心）
