@@ -28,3 +28,5 @@ local.properties
 /.idea/
 /buildSrc/.gradle/
 /buildSrc/build/
+/privacy-plugin/.gradle/
+/privacy-plugin/build/

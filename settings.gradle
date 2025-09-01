@@ -1,3 +1,4 @@
 rootProject.name = "PrivacyMethodHook"
 include ':app'
 include ':privacy-hook'
+include ':privacy-plugin'

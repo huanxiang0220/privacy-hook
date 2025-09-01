@@ -2,6 +2,8 @@ apply from: "config.gradle"
 
 buildscript {
     ext.kotlin_version = '1.9.24'
+    ext.booster_version = '4.0.0'
+
     repositories {
         google()
         mavenCentral()
