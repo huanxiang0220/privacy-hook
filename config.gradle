@@ -1,8 +1,8 @@
 ext {
-    version = [compileSdkVersion       : 33,
+    version = [compileSdkVersion       : 32,
                buildToolsVersion       : "30.0.3",
                minSdkVersion           : 21,
-               targetSdkVersion        : 33,
+               targetSdkVersion        : 32,
                versionCode             : 1,
                androidSupportSdkVersion: "33.0.0",
                renderscriptTargetApi   : 21,

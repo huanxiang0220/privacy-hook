@@ -1,10 +1,17 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
-apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-//apply plugin: 'com.mystery.privacy_hook'
+
+//隐私合规
+apply plugin: "com.mystery.privacy_hook"
+privacy_plugin_config {
+    isDebug = true
+    handle_annotation_desc = 'com.mystery.privacy.annotation.AsmMethodReplace'
+    inject = true
+    exclude = ['android.support', 'androidx']
+}
 
 android {
     namespace 'com.mystery.privacymethodhook'
@@ -15,7 +22,6 @@ android {
         targetSdkVersion rootProject.ext.version["targetSdkVersion"]
         versionCode rootProject.ext.version["versionCode"]
         versionName rootProject.ext.version["versionName"]
-        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -26,11 +32,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
     buildFeatures {
         viewBinding = true
@@ -44,6 +50,6 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.1'
-//    implementation project(path: ':privacy-hook')
-    implementation 'com.github.huanxiang0220:privacy-hook:1.0.5'
+    implementation project(path: ':privacy-hook')
+//    implementation 'com.github.season-max.asm_hook:toolsLibrary:v1.2'
 }
